@@ -1,130 +1,156 @@
-import './App.css'
-import { useState } from "react";
-import { FaIdCard,FaBolt,FaWater,FaCreditCard,FaPassport,FaVoteYea,FaFileAlt, FaHome,FaUserCheck,FaCertificate,FaClipboardList,FaUserShield,FaAddressCard } from "react-icons/fa";
-import { ShieldCheck, Zap, CheckCircle,ChevronDown } from "lucide-react";
+import './App.css';
+import { useState, useContext } from "react";
+import { 
+  FaIdCard, FaBolt, FaWater, FaCreditCard, FaPassport, FaVoteYea, 
+  FaFileAlt, FaHome, FaUserCheck, FaCertificate, FaAddressCard, FaWpforms, FaSearch 
+} from "react-icons/fa";
+import { ServiceContext } from './context/ServiceContext'; 
 
-function Services () {
+function Services() {
+
+  // Context se Data
+  const { services, loading } = useContext(ServiceContext);
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [search, setSearch] = useState("");
 
-  const services = [
-    { name: "Aadhar", category: "Documents",title:"Update name, address, mobile number, or biometric details in Aadhaar",  icon: <FaIdCard /> },
-    { name: "PAN Card", category: "Documents",title:"Apply for new PAN card or make corrections to existing PAN card", icon: <FaCreditCard /> },
-    { name: "Voter ID Card", category: "Documents",title:"Apply for new Voter ID card or make corrections", icon: <FaVoteYea /> },
-    { name: "Passport Apply", category: "Documents",title:"Apply for new passport or renewal", icon: <FaPassport /> },
-    { name: "Electricity Bill", category: "Bills",title:"Pay electricity bills instantly and get receipt",icon: <FaBolt /> },
-    { name: "Water Bill", category: "Bills",title:"Pay Water bills instantly and get receipt", icon: <FaWater /> },
-    { name: "Income Certificatel", category: "Certificates",title:"Get income certificate for educational scholarships, loans, and government benefits", icon: <FaFileAlt /> },
-    { name: "Caste Certificate", category: "Certificates",title:"Apply for SC/ST/OBC caste certificate for reservations and benefits", icon: <FaUserCheck /> },
-    { name: "Domicile Certificate", category: "Certificates",title:"Get domicile certificate to prove permanent residency", icon: <FaHome /> },
-    { name: "Birth Certificate", category: "Certificates",title:"Register birth and get birth certificate", icon:  <FaCertificate /> },
-    { name: "Death Certificate", category: "Certificates",title:"Register death and obtain death certificate", icon:  <FaFileAlt /> },
-    { name: "Ration Card", category: "Welfare Schemes",title:"Apply for new ration card or add/remove family members", icon:  <FaAddressCard /> },
-  ];
- 
-  // FILTER + SEARCH LOGIC
-    const filteredServices = services.filter((s) => {
+  // Icon Mapping Logic
+  const iconMap = {
+    "FaIdCard": FaIdCard,
+    "FaCreditCard": FaCreditCard,
+    "FaBolt": FaBolt,
+    "FaWater": FaWater,
+    "FaPassport": FaPassport,
+    "FaVoteYea": FaVoteYea,
+    "FaFileAlt": FaFileAlt,
+    "FaHome": FaHome,
+    "FaUserCheck": FaUserCheck,
+    "FaCertificate": FaCertificate,
+    "FaAddressCard": FaAddressCard
+  };
+
+  const getIcon = (iconName) => {
+    const IconComponent = iconMap[iconName];
+    return IconComponent ? <IconComponent /> : <FaWpforms />;
+  };
+
+  // Filter Logic
+  const filteredServices = services.filter((s) => {
     const matchCategory = activeCategory === "All" || s.category === activeCategory;
     const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
     return matchCategory && matchSearch;
   });
 
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
   return (
-    <div className="font-sans bg-gray-100">
-  
-    {/* HERO */}
-    <section
-       className="text-white py-10 px-6 relative"
-      style={{
-        backgroundImage: "url('https://img.freepik.com/free-photo/abstract-flowing-neon-wave-background_53876-101942.jpg?semt=ais_hybrid&w=740&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-      >
-        <div className="max-w-7xl mx-auto  grid md:grid-cols-2">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            All Services
-            </h1>
-            <p className="mb-6 text-lg">
+    <div className="font-sans bg-gray-50 min-h-screen">
+      
+      {/* HERO SECTION - Exact Screenshot Style */}
+      <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-10 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold">All Services</h1>
+          <p className="text-blue-200 mt-1 text-sm">
             सभी सेवाएं - Complete list of government services
-            </p>
-          </div>
+          </p>
         </div>
-    </section>
+      </div>
 
-    {/* SERVICES */}
-    <section className="py-16 px-6 max-w-7xl mx-auto">
-
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10 ">
+      {/* MAIN CONTENT AREA */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        
+        {/* Search & Filter Row */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          
+          {/* Search Input with Icon */}
+          <div className="relative w-full md:w-80">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search service...(eg.,PAN,Aadhaar,Passport)"
-                className="border px-4 py-3 rounded-lg w-full md:w-120 focus:outline-none focus:ring-2 focus:ring-blue-500 "
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search service..."
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
-            </div>
+          </div>
 
-            {/* Category Buttons */}
-            <div className="flex gap-3 mb-8 flex-wrap">
-            {["All", "Documents", "Bills", "Certificates","Welfare Schemes"].map((cat) => (
-                <button
+          {/* Filter Buttons */}
+          <div className="flex gap-2 flex-wrap">
+            {["All", "Documents", "Bills", "Certificates", "Welfare Schemes"].map((cat) => (
+              <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-full text-sm ${
-                    activeCategory === cat
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200"
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  activeCategory === cat
+                    ? "bg-blue-900 text-white shadow-md" // Active State
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200" // Inactive State
                 }`}
-                >
+              >
                 {cat}
-                </button>
+              </button>
             ))}
-            </div>
+          </div>
+        </div>
 
-            {/* Services Grid */}
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredServices.length > 0 ? (
-                 filteredServices.map((s, i) => (
-                <div
-                    key={i}
-                    className="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition cursor-pointer group relative"
-                >
-                    <span className="absolute top-3 right-3 text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
+        {/* Services Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {filteredServices.length > 0 ? (
+            filteredServices.map((s) => (
+              <div
+                key={s._id}
+                className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col relative"
+              >
+                
+                {/* Category Badge - Top Right */}
+                <div className="absolute top-3 right-3">
+                  <span className="text-[10px] font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">
                     {s.category}
-                    </span>
-
-                    <div className="text-3xl text-blue-600 mb-4 group-hover:scale-110 transition">
-                    {s.icon}
-                    </div>
-
-                    <h3 className="font-semibold text-lg mb-1">{s.name}</h3>
-
-                    <p className="text-sm text-gray-500 mb-3">
-                    {s.title}
-                    </p>
-
-                    <button className="text-blue-600 text-sm font-medium">
-                    Apply Now →
-                    </button>
+                  </span>
                 </div>
-                ))
-               ) : (
-                <p className="text-center col-span-full text-gray-500">
-                No services found 😔
-                </p>
-                )}
+
+                {/* Card Content */}
+                <div className="p-5 flex-grow">
+                  {/* Icon */}
+                  <div className="text-blue-600 text-3xl mb-4">
+                    {getIcon(s.icon)}
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="font-bold text-gray-800 text-base mb-1">
+                    {s.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
+                    {s.title}
+                  </p>
+                </div>
+
+                {/* Price & Apply Footer */}
+                <div className="px-5 py-3 border-t border-gray-100 flex justify-between items-center mt-auto">
+                  {/* Price */}
+                  <span className="text-green-600 font-bold text-sm">
+                    {s.price ? s.price : 'Free'}
+                  </span>
+                  
+                  {/* Apply Button */}
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
+                    Apply
+                  </button>
+                </div>
+
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10 text-gray-400">
+              No services found.
             </div>
-    </section>
-     {/* FOOTER */}
-     <footer className="bg-blue-700 text-white text-center py-4">
-        <p>© 2026 E-Mitra Portal</p>
-      </footer>
+          )}
+        </div>
+      </div>
     </div>
-       
   );
 }
 
