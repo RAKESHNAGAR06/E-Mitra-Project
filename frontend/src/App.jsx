@@ -1,12 +1,20 @@
 import './App.css'
-import Home from './Home'
-function App() {
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from './Navbar';
+import Home from './Home';
+import Services from './Services';
 
+function App() {
   return (
-    <>
-      <Home />
-    </>
+    <BrowserRouter>
+      <Navbar />
+
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/Services" element={<Services />} />
+        </Routes>
+    </BrowserRouter>
   )
 }
 
-export default App
+export default App;

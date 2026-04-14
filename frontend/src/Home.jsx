@@ -1,6 +1,6 @@
 import './App.css'
 import { useState } from "react";
-import { FaIdCard, FaBolt, FaWater, FaCreditCard, FaUserShield, FaClipboardList } from "react-icons/fa";
+import { FaIdCard,FaBolt,FaWater,FaCreditCard,FaPassport,FaVoteYea,FaFileAlt, FaHome,FaUserCheck,FaCertificate,FaClipboardList,FaUserShield,FaAddressCard } from "react-icons/fa";
 import { ShieldCheck, Zap, CheckCircle,ChevronDown } from "lucide-react";
 
 function Home() {
@@ -9,10 +9,18 @@ function Home() {
   const [search, setSearch] = useState("");
 
   const services = [
-    { name: "Aadhar", category: "Documents", icon: <FaIdCard /> },
-    { name: "PAN Card", category: "Documents", icon: <FaCreditCard /> },
-    { name: "Electricity Bill", category: "Bills", icon: <FaBolt /> },
-    { name: "Water Bill", category: "Bills", icon: <FaWater /> },
+    { name: "Aadhar", category: "Documents",title:"Update name, address, mobile number, or biometric details in Aadhaar", icon: <FaIdCard /> },
+    { name: "PAN Card", category: "Documents",title:"Apply for new PAN card or make corrections to existing PAN card", icon: <FaCreditCard /> },
+    { name: "Voter ID Card", category: "Documents",title:"Apply for new Voter ID card or make corrections", icon: <FaVoteYea /> },
+    { name: "Passport Apply", category: "Documents",title:"Apply for new passport or renewal", icon: <FaPassport /> },
+    { name: "Electricity Bill", category: "Bills",title:"Pay electricity bills instantly and get receipt",icon: <FaBolt /> },
+    { name: "Water Bill", category: "Bills",title:"Pay Water bills instantly and get receipt", icon: <FaWater /> },
+    { name: "Income Certificatel", category: "Certificates",title:"Get income certificate for educational scholarships, loans, and government benefits", icon: <FaFileAlt /> },
+    { name: "Caste Certificate", category: "Certificates",title:"Apply for SC/ST/OBC caste certificate for reservations and benefits", icon: <FaUserCheck /> },
+    { name: "Domicile Certificate", category: "Certificates",title:"Get domicile certificate to prove permanent residency", icon: <FaHome /> },
+    { name: "Birth Certificate", category: "Certificates",title:"Register birth and get birth certificate", icon:  <FaCertificate /> },
+    { name: "Death Certificate", category: "Certificates",title:"Register death and obtain death certificate", icon:  <FaFileAlt /> },
+    { name: "Ration Card", category: "Welfare Schemes",title:"Apply for new ration card or add/remove family members", icon:  <FaAddressCard /> },
   ];
   const benefits = [
     {
@@ -37,7 +45,14 @@ function Home() {
     const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
     return matchCategory && matchSearch;
   });
-
+  const uniqueServices = Object.values(
+    filteredServices.reduce((acc, curr) => {
+      if (!acc[curr.category]) {
+        acc[curr.category] = curr;
+      }
+      return acc;
+    }, {})
+  );
   const [open, setOpen] = useState(null);
 
   const faqs = [
@@ -64,7 +79,14 @@ function Home() {
     <div className="font-sans bg-gray-100">
   
     {/* HERO */}
-       <section className="bg-gradient-to-r from-blue-700 to-orange-500 text-white py-20 px-6">
+    <section
+       className="text-white py-20 px-6 relative"
+      style={{
+        backgroundImage: "url('https://img.freepik.com/free-photo/abstract-flowing-neon-wave-background_53876-101942.jpg?semt=ais_hybrid&w=740&q=80')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+      >
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -109,163 +131,144 @@ function Home() {
             <p className="text-gray-500">Support</p>
             </div>
         </div>
-      </section>
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50 px-6">
+    </section>
+    <section className="py-20 bg-gradient-to-b from-white to-gray-50 px-6">
 
-  <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
 
-    {/* LEFT IMAGE / ILLUSTRATION */}
-    <div className="relative group">
+        {/* LEFT IMAGE / ILLUSTRATION */}
+        <div className="relative group">
 
-      {/* Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-orange-500 rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition"></div>
+          {/* Glow Effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-orange-500 rounded-3xl blur-2xl opacity-20 group-hover:opacity-40 transition"></div>
 
-      {/* Border */}
-      <div className="relative p-[3px] rounded-3xl bg-gradient-to-r from-blue-600 to-orange-500">
+          {/* Border */}
+          <div className="relative p-[3px] rounded-3xl bg-gradient-to-r from-blue-600 to-orange-500">
 
-        <div className="bg-white rounded-3xl overflow-hidden shadow-xl">
+            <div className="bg-white rounded-3xl overflow-hidden shadow-xl">
 
-          <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ24QqQUuqESDKJbT56ob7gNTcMHfF3dFPfUTzqimEMzw&s"
-            alt="about"
-            className="w-200 h-90 object-cover"
-          />
+              <img
+                src="03.jpg"
+                alt="about"
+                className="w-200 h-90 object-cover"
+              />
+
+            </div>
+          </div>
 
         </div>
+
+        {/* RIGHT CONTENT */}
+        <div>
+
+          <h2 className="text-4xl font-bold mb-4">
+            About Our Platform
+          </h2>
+
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            We provide a one-stop solution for all government services like Aadhar, PAN Card, Bill Payments and more. 
+            Our platform is designed to make the process fast, secure and hassle-free for every citizen.
+          </p>
+
+          {/* FEATURES */}
+          <div className="space-y-4 mb-8">
+
+            <div className="flex items-start gap-3">
+              <div className="text-green-500 text-xl">✔</div>
+              <p>Easy and user-friendly interface</p>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="text-green-500 text-xl">✔</div>
+              <p>100% secure data protection</p>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="text-green-500 text-xl">✔</div>
+              <p>Fast processing with real-time tracking</p>
+            </div>
+
+          </div>
+
+          {/* CTA */}
+          <button className="bg-gradient-to-r from-blue-600 to-orange-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition">
+            Learn More →
+          </button>
+
+        </div>
+
       </div>
 
-    </div>
+      {/* EXTRA TRUST STRIP */}
+      <div className="mt-20 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 
-    {/* RIGHT CONTENT */}
-    <div>
+        {[
+          { title: "Government Approved" },
+          { title: "Secure Platform" },
+          { title: "Fast Processing" },
+          { title: "24/7 Support" }
+        ].map((item, i) => (
 
-      <h2 className="text-4xl font-bold mb-4">
-        About Our Platform
-      </h2>
+          <div key={i} className="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition">
+            <h3 className="font-semibold text-blue-700">
+              {item.title}
+            </h3>
+          </div>
 
-      <p className="text-gray-600 mb-6 leading-relaxed">
-        We provide a one-stop solution for all government services like Aadhar, PAN Card, Bill Payments and more. 
-        Our platform is designed to make the process fast, secure and hassle-free for every citizen.
-      </p>
-
-      {/* FEATURES */}
-      <div className="space-y-4 mb-8">
-
-        <div className="flex items-start gap-3">
-          <div className="text-green-500 text-xl">✔</div>
-          <p>Easy and user-friendly interface</p>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <div className="text-green-500 text-xl">✔</div>
-          <p>100% secure data protection</p>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <div className="text-green-500 text-xl">✔</div>
-          <p>Fast processing with real-time tracking</p>
-        </div>
+        ))}
 
       </div>
 
-      {/* CTA */}
-      <button className="bg-gradient-to-r from-blue-600 to-orange-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition">
-        Learn More →
-      </button>
-
-    </div>
-
-  </div>
-
-  {/* EXTRA TRUST STRIP */}
-  <div className="mt-20 max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-
-    {[
-      { title: "Government Approved" },
-      { title: "Secure Platform" },
-      { title: "Fast Processing" },
-      { title: "24/7 Support" }
-    ].map((item, i) => (
-
-      <div key={i} className="p-6 bg-white rounded-2xl shadow hover:shadow-lg transition">
-        <h3 className="font-semibold text-blue-700">
-          {item.title}
-        </h3>
-      </div>
-
-    ))}
-
-  </div>
-
-</section>
-
+    </section>
 
     {/* SERVICES */}
       <section className="py-16 px-6 max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-          <h2 className="text-3xl font-bold">Popular Services</h2>
-
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search service..."
-            className="border px-4 py-2 rounded-lg w-full md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Category Buttons */}
-        <div className="flex gap-3 mb-8 flex-wrap">
-          {["All", "Documents", "Bills", "Certificates"].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm ${
-                activeCategory === cat
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200"
-              }`}
+        <h2 className="text-3xl font-bold">Popular Services</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12">
+            <p>लोकप्रिय सेवाएं - Quick access to most used services</p>
+            <a 
+              href="#Services" 
+              className="inline-block mt-6 text-blue-600 font-medium  hover:text-orange-500 transition"
             >
-              {cat}
-            </button>
-          ))}
-        </div>
-
+              View All Services →
+            </a>
+          </div>
+        
     {/* Services Grid */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredServices.length > 0 ? (
-            filteredServices.map((s, i) => (
-              <div
-                key={i}
-                className="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition cursor-pointer group relative"
-              >
-                <span className="absolute top-3 right-3 text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
-                  Popular
-                </span>
+    <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+  {uniqueServices.length > 0 ? (
+    uniqueServices.map((s, i) => (
+      <div
+        key={i}
+        className="bg-white p-6 rounded-2xl shadow hover:shadow-xl transition cursor-pointer group relative"
+      >
+        <span className="absolute top-3 right-3 text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded">
+          {s.category}
+        </span>
 
-                <div className="text-3xl text-blue-600 mb-4 group-hover:scale-110 transition">
-                  {s.icon}
-                </div>
-
-                <h3 className="font-semibold text-lg mb-1">{s.name}</h3>
-
-                <p className="text-sm text-gray-500 mb-3">
-                  Apply quickly and securely online
-                </p>
-
-                <button className="text-blue-600 text-sm font-medium">
-                  Apply Now →
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-center col-span-full text-gray-500">
-              No services found 😔
-            </p>
-          )}
+        <div className="text-3xl text-blue-600 mb-4 group-hover:scale-110 transition">
+          {s.icon}
         </div>
+
+        <h3 className="font-semibold text-lg mb-1">{s.name}</h3>
+
+        <p className="text-sm text-gray-500 mb-3">
+          {s.title}
+        </p>
+
+        <button className="text-blue-600 text-sm font-medium">
+          Apply Now →
+        </button>
+      </div>
+    ))
+  ) : (
+    <p className="text-center col-span-full text-gray-500">
+      No services found 😔
+    </p>
+  )}
+</div>
 
       </section>
 
@@ -347,67 +350,69 @@ function Home() {
       </section>
 
       {/* BENEFITS */}
-      <section className="py-10">
-
-        {/* Heading */}
+      <section className="py-20 bg-gray-100">
+  
+      {/* Heading */}
         <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-3">
-            Why Choose Us
-            </h2>
-            <p className="text-gray-500 max-w-xl mx-auto">
-            Experience fast, secure and reliable government services at one place
-            </p>
+          <h2 className="text-4xl font-bold text-gray-800">
+            Why Choose e-Mitra?
+          </h2>
+          <p className="text-gray-500 mt-2">
+            हमें क्यों चुनें? Your Trusted Government Service Partner
+          </p>
         </div>
 
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
+        {/* Cards */}
+        <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-10 text-center">
 
-            {benefits.map((b, i) => (
-            <div
-                key={i}
-                className="relative group text-center"
-            >
+          {[
+            {
+              title: "100% Secure",
+              desc: "Your data is safe with government-approved processes",
+              color: "bg-blue-600",
+              icon: "🛡️"
+            },
+            {
+              title: "Fast Processing",
+              desc: "Quick turnaround time for all services",
+              color: "bg-orange-500",
+              icon: "⏱️"
+            },
+            {
+              title: "Expert Support",
+              desc: "Trained professionals to assist you",
+              color: "bg-green-600",
+              icon: "👨‍💼"
+            },
+            {
+              title: "Verified Services",
+              desc: "All services are officially authorized",
+              color: "bg-purple-600",
+              icon: "📄"
+            }
+          ].map((item, i) => (
 
-                {/* Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-orange-500 rounded-3xl blur-xl opacity-0 group-hover:opacity-30 transition"></div>
+            <div key={i} className="flex flex-col items-center">
+        
+              {/* Icon Box */}
+              <div className={`${item.color} w-16 h-16 flex items-center justify-center rounded-2xl text-white text-2xl shadow-md mb-4`}>
+                {item.icon}
+              </div>
 
-                {/* Card */}
-                <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-blue-600 to-orange-500">
+              {/* Title */}
+              <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                {item.title}
+              </h3>
 
-                <div className="bg-white p-8 rounded-3xl shadow-md group-hover:shadow-2xl transition">
-
-                    {/* Icon Circle */}
-                    <div className="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-orange-500 text-white text-2xl shadow-lg group-hover:scale-110 transition">
-                    {b.icon}
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="text-xl font-semibold mb-2">
-                    {b.title}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-gray-500 text-sm">
-                    {b.title === "Fast" && "Quick processing with minimal wait time"}
-                    {b.title === "Secure" && "Your data is protected with high security"}
-                    {b.title === "Reliable" && "Trusted service with high success rate"}
-                    </p>
-
-                </div>
-                </div>
+              {/* Description */}
+              <p className="text-gray-500 text-sm max-w-xs">
+                {item.desc}
+              </p>
 
             </div>
-            ))}
 
-        </div>
+          ))}
 
-        {/* Bottom Highlight Strip */}
-        <div className="mt-20 max-w-5xl mx-auto bg-gradient-to-r from-blue-700 to-orange-500 text-white rounded-3xl p-8 text-center shadow-lg">
-            <h3 className="text-2xl font-semibold mb-2">
-            Trusted by Thousands of Users
-            </h3>
-            <p className="opacity-90">
-            Join our platform and experience hassle-free government services today
-            </p>
         </div>
 
       </section>
