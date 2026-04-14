@@ -4,7 +4,8 @@ import React, { createContext, useState, useEffect } from 'react';
 export const ServiceContext = createContext();
 
 // Ye tera Backend URL hai (jo terminal pe chal raha hai)
-const API_URL = "http://localhost:5000/api/services";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = BASE_URL + "/services";
 
 export const ServiceProvider = ({ children }) => {
   const [services, setServices] = useState([]);
