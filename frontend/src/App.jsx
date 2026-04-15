@@ -5,6 +5,7 @@ import Home from './Home';
 import Services from './Services';
 import About from './About';
 import Contact from './Contact'
+import ServiceDetail from './ServiceDetail';
 import Footer from './Footer';
 // Admin Imports
 import AdminLayout from './Admin/AdminLayout';
@@ -32,6 +33,7 @@ function App() {
               <Route path="/Services" element={<Services />} />
               <Route path="/About" element={<About />} />
               <Route path="/Contact" element={<Contact />} />
+              <Route path="/service/aadhaar" element={<ServiceDetail />} />
             </Routes>
             <Footer />
           </>
