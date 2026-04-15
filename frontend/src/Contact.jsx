@@ -51,7 +51,7 @@ function Contact() {
         </div>
 
         {/* Main Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white shadow-xl p-6 md:p-10 border border-gray-100 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white  shadow-xl p-6 md:p-10 border border-gray-100 w-full">
           
           {/* LEFT SIDE - Form */}
           <div className="bg-gray-50 p-8 rounded-2xl">

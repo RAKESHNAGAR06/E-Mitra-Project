@@ -171,7 +171,7 @@ function Home() {
                 </div>
 
                 <div className="px-5 py-3 border-t border-gray-100 flex justify-between items-center mt-auto">
-                  <span className="text-green-600 font-bold text-sm">
+                  <span className="text-green-600 font-bold text-sm">₹
                     {s.price ? s.price : 'Free'}
                   </span>
                   
