@@ -8,6 +8,7 @@ import Services from './Services';
 import AdminLayout from './Admin/AdminLayout';
 import Dashboard from './Admin/Deshboard';
 import ManageServices from './Admin/ManageServices';
+import Settings from './Admin/Settings';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} /> {/* /admin path */}
           <Route path="services" element={<ManageServices />} /> {/* /admin/services path */}
+          <Route path="settings" element={<Settings />} /> {/* /admin/settings path */}
           {/* Add more admin routes here */}
         </Route>
 
