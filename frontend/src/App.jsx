@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from './Navbar';
 import Home from './Home';
 import Services from './Services';
-
+import About from './About';
+import Contact from './Contact'
+import Footer from './Footer';
 // Admin Imports
 import AdminLayout from './Admin/AdminLayout';
 import Dashboard from './Admin/Deshboard';
@@ -28,7 +30,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/Services" element={<Services />} />
+              <Route path="/About" element={<About />} />
+              <Route path="/Contact" element={<Contact />} />
             </Routes>
+            <Footer />
           </>
         } />
         

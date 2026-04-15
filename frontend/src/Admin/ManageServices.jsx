@@ -18,7 +18,7 @@ const ManageServices = () => {
     icon: 'FaFileAlt' 
   });
 
-  const categories = ["Documents", "Bills", "Certificates", "Welfare Schemes"];
+  const categories = ["Documents", "Bills", "Certificates", "Welfare Schemes","Other Services"];
   const icons = ["FaIdCard", "FaBolt", "FaWater", "FaCreditCard", "FaPassport", "FaHome", "FaFileAlt"];
 
   // Input Change Handler

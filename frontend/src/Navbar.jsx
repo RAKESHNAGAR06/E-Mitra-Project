@@ -12,8 +12,8 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/', hindi: 'होम' },
     { name: 'Services', path: '/Services', hindi: 'सेवाएं' },
-    { name: 'About', path: '#', hindi: 'बारे में' }, // Abhi ke liye #
-    { name: 'Contact', path: '#', hindi: 'कन्टैक्ट' }, // Abhi ke liye #
+    { name: 'About', path: '/About', hindi: 'बारे में' }, 
+    { name: 'Contact', path: '/Contact', hindi: 'कन्टैक्ट' }, // Abhi ke liye #
   ];
 
   useEffect(() => {
