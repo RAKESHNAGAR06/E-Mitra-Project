@@ -4,12 +4,15 @@ import './index.css'
 import App from './App.jsx'
 
 import { ServiceProvider } from './context/ServiceContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     {/* App ko Provider se wrap kiya */}
-    <ServiceProvider>
-      <App />
-    </ServiceProvider>
+    <AuthProvider>
+      <ServiceProvider>
+        <App />
+      </ServiceProvider>
+    </AuthProvider>
   </StrictMode>,
 )

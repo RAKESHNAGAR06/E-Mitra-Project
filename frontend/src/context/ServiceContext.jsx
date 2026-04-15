@@ -1,5 +1,6 @@
 // src/context/ServiceContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
+import { getStoredToken } from "./AuthContext";
 
 export const ServiceContext = createContext();
 
@@ -10,6 +11,11 @@ const API_URL = BASE_URL + "/services";
 export const ServiceProvider = ({ children }) => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const authHeaders = () => {
+    const token = getStoredToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   // 1. Data Load karna (MongoDB se)
   const fetchServices = async () => {
@@ -34,10 +40,11 @@ export const ServiceProvider = ({ children }) => {
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify(service),
       });
       const newService = await res.json();
+      if (!res.ok) return { success: false, error: newService?.error || "Failed to add service" };
       setServices([...services, newService]); // UI Update
       return { success: true };
     } catch (error) {
@@ -50,10 +57,11 @@ export const ServiceProvider = ({ children }) => {
     try {
       const res = await fetch(`${API_URL}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify(updatedData),
       });
       const data = await res.json();
+      if (!res.ok) return { success: false, error: data?.error || "Failed to update service" };
       setServices(services.map((s) => (s._id === id ? data : s)));
       return { success: true };
     } catch (error) {
@@ -64,7 +72,9 @@ export const ServiceProvider = ({ children }) => {
   // 4. Service Delete Karna
   const deleteService = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE", headers: { ...authHeaders() } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return { success: false, error: data?.error || "Failed to delete service" };
       setServices(services.filter((s) => s._id !== id));
       return { success: true };
     } catch (error) {

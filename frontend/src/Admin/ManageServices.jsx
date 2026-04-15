@@ -43,7 +43,7 @@ const ManageServices = () => {
   };
 
   // --- SUBMIT (ADD or UPDATE) ---
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if(!currentService.name || !currentService.title) {
       alert("Please fill Name and Description");
       return;
@@ -51,18 +51,29 @@ const ManageServices = () => {
 
     if (isEditing) {
       // Update Logic
-      updateService(currentService._id, currentService);
+      const res = await updateService(currentService._id, currentService);
+      if (!res?.success) {
+        alert(res?.error || "Update failed (login required)");
+        return;
+      }
     } else {
       // Add Logic
-      addService(currentService);
+      const res = await addService(currentService);
+      if (!res?.success) {
+        alert(res?.error || "Add failed (login required)");
+        return;
+      }
     }
     setIsModalOpen(false);
   };
 
   // --- DELETE FUNCTION ---
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if(window.confirm("Are you sure you want to delete this service?")) {
-      deleteService(id);
+      const res = await deleteService(id);
+      if (!res?.success) {
+        alert(res?.error || "Delete failed (login required)");
+      }
     }
   };
 
