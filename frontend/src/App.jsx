@@ -37,7 +37,7 @@ function App() {
               <Route path="/About" element={<About />} />
               <Route path="/Contact" element={<Contact />} />
               <Route path="/dashboard" element={<UserDashboard />} />
-              <Route path="/service/aadhaar" element={<ServiceDetail />} />
+              <Route path="/service/:slug" element={<ServiceDetail />} />
             </Routes>
             <Footer />
           </>

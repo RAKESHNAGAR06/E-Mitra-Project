@@ -1,5 +1,6 @@
 import './App.css';
 import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { 
   FaIdCard, FaBolt, FaWater, FaCreditCard, FaPassport, FaVoteYea, 
   FaFileAlt, FaHome, FaUserCheck, FaCertificate, FaAddressCard, FaWpforms, FaSearch 
@@ -136,9 +137,12 @@ function Services() {
                   </span>
                   
                   {/* Apply Button */}
-                  <a href='/service/aadhaar'> <button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
+                  <Link
+                    to={`/service/${encodeURIComponent((s.slug || s._id || "").toString())}`}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors inline-block"
+                  >
                     Apply
-                  </button> </a>
+                  </Link>
                 </div>
 
               </div>

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FaPhoneAlt,
   FaWhatsapp,
@@ -12,33 +12,18 @@ import {
 } from "react-icons/fa";
 import { UserAuthContext } from "./context/UserAuthContext";
 import UserAuthModal from "./UserAuthModal";
+import { mapsDirectionsUrl, mapsEmbedSrc, telHref, waMeUrl } from "./utils/contactLinks";
+import { startRazorpayPayment } from "./utils/startRazorpayPayment";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-function loadRazorpayScript() {
-  return new Promise((resolve) => {
-    if (typeof window !== "undefined" && window.Razorpay) {
-      resolve(true);
-      return;
-    }
-    const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
-    if (existing) {
-      existing.addEventListener("load", () => resolve(true));
-      existing.addEventListener("error", () => resolve(false));
-      return;
-    }
-    const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.body.appendChild(s);
-  });
-}
-
 function Contact() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isLoggedIn, bootstrapped, user, getAuthHeader } = useContext(UserAuthContext);
   const [authOpen, setAuthOpen] = useState(false);
+  const [site, setSite] = useState(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -66,6 +51,22 @@ function Contact() {
         if (!cancelled && Array.isArray(data)) setServices(data);
       } catch {
         /* keep static fallback */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/site-settings`);
+        const data = await res.json().catch(() => ({}));
+        if (!cancelled && res.ok) setSite(data);
+      } catch {
+        /* ignore */
       }
     })();
     return () => {
@@ -184,6 +185,18 @@ function Contact() {
 
       setCreatedRequest(data.serviceRequest);
       setPaymentMsg("");
+
+      setFormData({
+        name: user?.name ? String(user.name) : "",
+        mobile: user?.phone ? String(user.phone).replace(/\s/g, "") : "",
+        service: "",
+        message: "",
+      });
+      setFile(null);
+      setFileError("");
+      setPrefillMeta(null);
+      setFileInputKey((k) => k + 1);
+      navigate("/Contact", { replace: true, state: {} });
     } catch (err) {
       setFormError(err.message || "Submission failed");
     } finally {
@@ -196,85 +209,34 @@ function Contact() {
     setPaymentBusy(true);
     setPaymentMsg("");
     try {
-      const orderRes = await fetch(`${API_URL}/payments/razorpay/order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeader(),
+      const result = await startRazorpayPayment({
+        apiBase: API_URL,
+        getAuthHeader,
+        serviceRequest: createdRequest,
+        prefillEmail: user?.email,
+        prefillContact: formData.mobile,
+        onVerified: () => {
+          setCreatedRequest((prev) => ({ ...prev, paymentStatus: "paid" }));
+          setPaymentMsg("Payment successful. Your request is confirmed.");
         },
-        body: JSON.stringify({ serviceRequestId: createdRequest.id }),
       });
-      const orderData = await orderRes.json().catch(() => ({}));
-      if (orderRes.status === 503) {
-        setPaymentMsg(
-          "Payment gateway is not configured on the server. Add Razorpay keys in backend .env (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)."
-        );
-        return;
+      if (result?.dismissed) {
+        setPaymentMsg("");
       }
-      if (!orderRes.ok) throw new Error(orderData?.error || "Could not start payment");
-
-      const ok = await loadRazorpayScript();
-      if (!ok || !window.Razorpay) {
-        throw new Error("Could not load Razorpay checkout.");
-      }
-
-      const options = {
-        key: orderData.keyId,
-        order_id: orderData.orderId,
-        currency: orderData.currency || "INR",
-        name: "e-Mitra",
-        description: createdRequest.serviceName || "Service fee",
-        handler: async (response) => {
-          try {
-            const verifyRes = await fetch(`${API_URL}/payments/razorpay/verify`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                ...getAuthHeader(),
-              },
-              body: JSON.stringify({
-                serviceRequestId: createdRequest.id,
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-              }),
-            });
-            const verifyData = await verifyRes.json().catch(() => ({}));
-            if (!verifyRes.ok) throw new Error(verifyData?.error || "Verification failed");
-            setCreatedRequest((prev) => ({ ...prev, paymentStatus: "paid" }));
-            setPaymentMsg("Payment successful. Your request is confirmed.");
-          } catch (err) {
-            setPaymentMsg(err.message || "Payment verification failed");
-          } finally {
-            setPaymentBusy(false);
-          }
-        },
-        modal: {
-          ondismiss: () => setPaymentBusy(false),
-        },
-        prefill: {
-          email: user?.email || undefined,
-          contact: formData.mobile || undefined,
-        },
-        theme: { color: "#2563eb" },
-      };
-
-      const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", () => {
-        setPaymentMsg("Payment failed or was cancelled.");
-        setPaymentBusy(false);
-      });
-      rzp.open();
     } catch (err) {
       setPaymentMsg(err.message || "Payment could not start");
+    } finally {
       setPaymentBusy(false);
     }
   };
 
-  const address = "Main Market, District Center, Rajasthan - 302001, India";
-  const mapCoords = "24.4339432,75.9863679";
-  const mapSrc = `https://www.google.com/maps?q=${mapCoords}&output=embed`;
-  const directionsLink = `https://www.google.com/maps?q=${mapCoords}`;
+  const address =
+    site?.address?.trim() || "Main Market, District Center, Rajasthan - 302001, India";
+  const mapSrc = mapsEmbedSrc(site?.mapLatitude, site?.mapLongitude) || `https://www.google.com/maps?q=24.4339432,75.9863679&output=embed`;
+  const directionsLink = mapsDirectionsUrl(site?.mapLatitude, site?.mapLongitude, site?.visitCenterUrl) || `https://www.google.com/maps?q=24.4339432,75.9863679`;
+  const visitUrl = directionsLink;
+  const tel = telHref(site?.phoneDisplay);
+  const wa = waMeUrl(site?.whatsappNumber);
 
   const showPayment =
     createdRequest &&
@@ -380,6 +342,7 @@ function Contact() {
                   Upload document / दस्तावेज़ <span className="text-red-500">*</span>
                 </label>
                 <input
+                  key={fileInputKey}
                   type="file"
                   accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf"
                   onChange={onFile}
@@ -456,24 +419,46 @@ function Contact() {
             <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-5 md:p-6 rounded-2xl shadow-md w-full">
               <h3 className="text-base md:text-lg font-bold text-white mb-3 md:mb-4">Quick Contact</h3>
               <div className="space-y-3">
-                <button
-                  type="button"
-                  className="w-full py-2.5 md:py-3 text-sm bg-orange-400 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
-                >
-                  <FaMapMarkerAlt /> Visit Center
-                </button>
-                <button
-                  type="button"
-                  className="w-full py-2.5 md:py-3 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
-                >
-                  <FaPhoneAlt /> Call Now
-                </button>
-                <button
-                  type="button"
-                  className="w-full py-2.5 md:py-3 text-sm bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
-                >
-                  <FaWhatsapp className="text-lg" /> WhatsApp
-                </button>
+                {visitUrl ? (
+                  <a
+                    href={visitUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 md:py-3 text-sm bg-orange-400 hover:bg-orange-500 text-white font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <FaMapMarkerAlt /> Visit Center
+                  </a>
+                ) : (
+                  <button type="button" disabled className="w-full py-2.5 md:py-3 text-sm bg-gray-300 text-white font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                    <FaMapMarkerAlt /> Visit Center
+                  </button>
+                )}
+                {tel ? (
+                  <a
+                    href={tel}
+                    className="w-full py-2.5 md:py-3 text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+                  >
+                    <FaPhoneAlt /> Call Now
+                  </a>
+                ) : (
+                  <button type="button" disabled className="w-full py-2.5 md:py-3 text-sm bg-gray-200 text-gray-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                    <FaPhoneAlt /> Call Now
+                  </button>
+                )}
+                {wa ? (
+                  <a
+                    href={wa}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 md:py-3 text-sm bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <FaWhatsapp className="text-lg" /> WhatsApp
+                  </a>
+                ) : (
+                  <button type="button" disabled className="w-full py-2.5 md:py-3 text-sm bg-gray-300 text-white font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
+                    <FaWhatsapp className="text-lg" /> WhatsApp
+                  </button>
+                )}
               </div>
             </div>
 
@@ -493,23 +478,34 @@ function Contact() {
                   <FaPhoneAlt className="text-blue-500 text-base md:text-xl mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-800">Phone</p>
-                    <p className="text-gray-600">+91 98765 43210</p>
-                    <p className="text-gray-600">+91 141 234 5678</p>
+                    {site?.phoneDisplay ? (
+                      <a href={telHref(site.phoneDisplay) || "#"} className="text-gray-600 hover:text-blue-700 block">
+                        {site.phoneDisplay}
+                      </a>
+                    ) : (
+                      <p className="text-gray-600">—</p>
+                    )}
+                    {site?.phoneSecondary ? <p className="text-gray-600">{site.phoneSecondary}</p> : null}
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <FaEnvelope className="text-purple-500 text-base md:text-xl mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-800">Email</p>
-                    <p className="text-gray-600">info@emitra.gov.in</p>
+                    {site?.email ? (
+                      <a href={`mailto:${site.email}`} className="text-gray-600 hover:text-blue-700 break-all">
+                        {site.email}
+                      </a>
+                    ) : (
+                      <p className="text-gray-600">—</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <FaClock className="text-orange-500 text-base md:text-xl mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-gray-800">Working Hours</p>
-                    <p className="text-gray-600">Monday - Saturday: 9:00 AM - 6:00 PM</p>
-                    <p className="text-red-500 text-xs font-medium mt-0.5">Sunday: Closed</p>
+                    <p className="text-gray-600 whitespace-pre-line">{site?.workingHours || "—"}</p>
                   </div>
                 </div>
               </div>

@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserAuthContext } from "./context/UserAuthContext";
 import UserAuthModal from "./UserAuthModal";
-import { FaClipboardList, FaCheckCircle, FaHourglassHalf, FaTimesCircle } from "react-icons/fa";
+import { FaClipboardList, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaCreditCard } from "react-icons/fa";
+import { startRazorpayPayment } from "./utils/startRazorpayPayment";
 
 export default function UserDashboard() {
   const { isLoggedIn, bootstrapped, getAuthHeader, apiBase, user } = useContext(UserAuthContext);
@@ -10,6 +11,8 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState("");
+  const [payMsg, setPayMsg] = useState("");
+  const [payingId, setPayingId] = useState(null);
 
   useEffect(() => {
     if (!bootstrapped || !isLoggedIn) {
@@ -39,6 +42,30 @@ export default function UserDashboard() {
       cancelled = true;
     };
   }, [bootstrapped, isLoggedIn, apiBase, getAuthHeader]);
+
+  const payRequest = async (r) => {
+    if (!r?.id) return;
+    setPayingId(r.id);
+    setPayMsg("");
+    try {
+      const result = await startRazorpayPayment({
+        apiBase,
+        getAuthHeader,
+        serviceRequest: r,
+        prefillEmail: user?.email,
+        prefillContact: r.contactMobile || user?.phone,
+        onVerified: () => {
+          setRequests((prev) => prev.map((x) => (x.id === r.id ? { ...x, paymentStatus: "paid" } : x)));
+          setPayMsg("Payment successful. Your request is confirmed.");
+        },
+      });
+      if (result?.dismissed) setPayMsg("");
+    } catch (e) {
+      setPayMsg(e.message || "Payment could not start");
+    } finally {
+      setPayingId(null);
+    }
+  };
 
   if (!bootstrapped) {
     return (
@@ -97,6 +124,15 @@ export default function UserDashboard() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+        {payMsg ? (
+          <div
+            className={`rounded-xl px-4 py-3 text-sm ${
+              payMsg.includes("successful") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-700"
+            }`}
+          >
+            {payMsg}
+          </div>
+        ) : null}
         {error ? (
           <div className="rounded-xl bg-red-50 text-red-700 px-4 py-3 text-sm">{error}</div>
         ) : null}
@@ -120,7 +156,7 @@ export default function UserDashboard() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="mt-1">{statusIcon(r)}</div>
-                        <div>
+                        <div className="flex-1 min-w-0">
                           <p className="font-semibold text-gray-900">{r.serviceName}</p>
                           <p className="text-xs text-gray-500">
                             Payment: <span className="font-medium">{r.paymentStatus}</span> · Status:{" "}
@@ -131,6 +167,16 @@ export default function UserDashboard() {
                           </p>
                         </div>
                       </div>
+                      {r.paymentStatus !== "paid" && Number(r.amountPaise) >= 100 ? (
+                        <button
+                          type="button"
+                          disabled={payingId === r.id}
+                          onClick={() => payRequest(r)}
+                          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white text-sm font-semibold"
+                        >
+                          <FaCreditCard /> {payingId === r.id ? "Opening…" : "Pay now"}
+                        </button>
+                      ) : null}
                     </li>
                   ))}
                 </ul>

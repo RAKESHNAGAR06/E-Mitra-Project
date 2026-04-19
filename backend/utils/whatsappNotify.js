@@ -33,13 +33,22 @@ async function notifyAdminNewServiceRequest(payload) {
 
   const body = lines.join("\n");
 
-  await client.messages.create({
-    from: `whatsapp:${from.replace(/^whatsapp:/, "")}`,
-    to: `whatsapp:${to.replace(/^whatsapp:/, "")}`,
-    body,
-  });
-
-  return { sent: true };
+  try {
+    const msg = await client.messages.create({
+      from: `whatsapp:${from.replace(/^whatsapp:/, "")}`,
+      to: `whatsapp:${to.replace(/^whatsapp:/, "")}`,
+      body,
+    });
+    return { sent: true, sid: msg.sid };
+  } catch (e) {
+    console.error(
+      "Twilio WhatsApp error:",
+      e?.message || e,
+      e?.code,
+      e?.moreInfo || e?.more_info
+    );
+    throw e;
+  }
 }
 
 module.exports = { notifyAdminNewServiceRequest };
