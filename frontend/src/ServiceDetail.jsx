@@ -170,9 +170,25 @@ const ServiceDetail = () => {
             </div>
 
             {/* Button */}
-            <a href='/contact'><button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 mb-4">
-                Apply Now <FaArrowRight />
-              </button></a>
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/Contact", {
+                  state: {
+                    service: {
+                      name: serviceData.title,
+                      category: serviceData.category,
+                      fee: serviceData.fee,
+                      time: serviceData.time,
+                      slug: "aadhaar",
+                    },
+                  },
+                })
+              }
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 mb-4"
+            >
+              Apply Now <FaArrowRight />
+            </button>
               <button className="w-full py-3 bg-gray-200 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
                 <FaFileAlt /> Download Form
               </button>

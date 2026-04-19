@@ -37,4 +37,14 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { requireAuth, requireRole };
+function requireCustomer(req, res, next) {
+  if (!req.auth?.role) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  if (req.auth.role !== "user") {
+    return res.status(403).json({ error: "Customer account required" });
+  }
+  return next();
+}
+
+module.exports = { requireAuth, requireRole, requireCustomer };

@@ -17,6 +17,43 @@ function signToken(user) {
   );
 }
 
+function publicUserPayload(user) {
+  return {
+    id: String(user._id),
+    email: user.email,
+    role: user.role,
+    name: user.name || "",
+    phone: user.phone || "",
+  };
+}
+
+router.post("/register", async (req, res) => {
+  try {
+    const { name, email, password, phone } = req.body || {};
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "name, email and password are required" });
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const existing = await User.findOne({ email: normalizedEmail });
+    if (existing) return res.status(409).json({ error: "Email already registered" });
+
+    const passwordHash = await bcrypt.hash(String(password), 10);
+    const user = await User.create({
+      email: normalizedEmail,
+      passwordHash,
+      role: "user",
+      name: String(name).trim(),
+      phone: phone ? String(phone).trim() : "",
+    });
+
+    const token = signToken(user);
+    return res.status(201).json({ token, user: publicUserPayload(user) });
+  } catch (err) {
+    return res.status(500).json({ error: "Registration failed" });
+  }
+});
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body || {};
@@ -33,7 +70,7 @@ router.post("/login", async (req, res) => {
     const token = signToken(user);
     return res.json({
       token,
-      user: { id: String(user._id), email: user.email, role: user.role },
+      user: publicUserPayload(user),
     });
   } catch (err) {
     return res.status(500).json({ error: "Login failed" });
@@ -41,7 +78,13 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/me", requireAuth, async (req, res) => {
-  return res.json({ user: { id: req.auth.sub, email: req.auth.email, role: req.auth.role } });
+  try {
+    const user = await User.findById(req.auth.sub).select("email role name phone");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    return res.json({ user: publicUserPayload(user) });
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to load profile" });
+  }
 });
 
 module.exports = router;

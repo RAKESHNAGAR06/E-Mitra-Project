@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom'; // Link aur useLocation import kiya
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { UserAuthContext } from './context/UserAuthContext';
+import UserAuthModal from './UserAuthModal';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -7,6 +9,8 @@ const Navbar = () => {
   
   // useLocation hook se current path pata karenge active link ke liye
   const location = useLocation();
+  const { isLoggedIn, bootstrapped, user, logout } = useContext(UserAuthContext);
+  const [userAuthOpen, setUserAuthOpen] = useState(false);
 
   // NavLinks data - yahan paths define kiye hain
   const navLinks = [
@@ -97,10 +101,31 @@ const Navbar = () => {
                 </Link>
               ))}
               
-              {/* CTA Button */}
-              <button className="ml-4 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-orange-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300">
-                Get Started
-              </button>
+              {bootstrapped && isLoggedIn ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="ml-2 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-blue-700"
+                  >
+                    My dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => logout()}
+                    className="ml-2 px-4 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-800"
+                  >
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setUserAuthOpen(true)}
+                  className="ml-4 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-orange-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105 transition-all duration-300"
+                >
+                  Get Started
+                </button>
+              )}
             </div>
 
             {/* Hamburger Button */}
@@ -243,10 +268,39 @@ const Navbar = () => {
         </div>
 
         {/* Menu Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-100 bg-gray-50/50">
-          <button className="w-full py-4 bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 active:scale-95 transition-all duration-300">
-            Get Started
-          </button>
+        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-100 bg-gray-50/50 space-y-2">
+          {bootstrapped && isLoggedIn ? (
+            <>
+              <Link
+                to="/dashboard"
+                onClick={() => setIsOpen(false)}
+                className="block w-full py-3 text-center rounded-2xl bg-white border border-gray-200 text-gray-800 font-semibold"
+              >
+                My dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  logout();
+                }}
+                className="w-full py-3 rounded-2xl border border-gray-200 text-gray-700 font-semibold"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                setUserAuthOpen(true);
+              }}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-orange-500 text-white font-semibold rounded-2xl shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 active:scale-95 transition-all duration-300"
+            >
+              Get Started
+            </button>
+          )}
           <p className="text-center text-xs text-gray-400 mt-4">
             e-Mitra Digital Services
           </p>
@@ -255,6 +309,8 @@ const Navbar = () => {
 
       {/* Spacer for fixed navbar */}
       <div className="h-20"></div>
+
+      <UserAuthModal open={userAuthOpen} onClose={() => setUserAuthOpen(false)} />
     </>
   );
 };

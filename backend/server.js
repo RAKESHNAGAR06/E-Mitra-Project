@@ -8,6 +8,8 @@ const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const authRoutes = require("./routes/auth");
 const adminUsersRoutes = require("./routes/adminUsers");
+const serviceRequestsRoutes = require("./routes/serviceRequests");
+const paymentsRoutes = require("./routes/payments");
 const { requireAuth, requireRole } = require("./middleware/auth");
 
 const app = express();
@@ -72,6 +74,8 @@ const Service = mongoose.model('Service', serviceSchema);
 // --- API ROUTES ---
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminUsersRoutes);
+app.use("/api/service-requests", serviceRequestsRoutes);
+app.use("/api/payments", paymentsRoutes);
 
 // 1. Get All Services (Read)
 app.get('/api/services', async (req, res) => {
