@@ -10,13 +10,22 @@ const ManageServices = () => {
   const [isEditing, setIsEditing] = useState(false); // Edit mode check karne ke liye
   
   // Form Data State
-  const [currentService, setCurrentService] = useState({ 
-    name: '', 
-    title: '', 
-    price: '', 
-    category: 'Documents', 
-    icon: 'FaFileAlt' 
+  const emptyForm = () => ({
+    name: "",
+    title: "",
+    price: "",
+    category: "Documents",
+    icon: "FaFileAlt",
+    slug: "",
+    aboutContent: "",
+    processingTime: "7 - 10 working days",
+    stepsText: "",
+    documentsText: "",
+    formUrl: "",
+    nameHi: "",
   });
+
+  const [currentService, setCurrentService] = useState(() => emptyForm());
 
   const categories = ["Documents", "Bills", "Certificates", "Welfare Schemes","Other Services"];
   const icons = ["FaIdCard", "FaBolt", "FaWater", "FaCreditCard", "FaPassport", "FaHome", "FaFileAlt"];
@@ -29,36 +38,51 @@ const ManageServices = () => {
   // --- ADD FUNCTION ---
   const openAddModal = () => {
     setIsEditing(false);
-    // Reset form
-    setCurrentService({ name: '', title: '', price: '', category: 'Documents', icon: 'FaFileAlt' });
+    setCurrentService(emptyForm());
     setIsModalOpen(true);
   };
 
   // --- EDIT FUNCTION ---
   const openEditModal = (service) => {
     setIsEditing(true);
-    // Form me purana data bharna
-    setCurrentService(service);
+    setCurrentService({
+      ...emptyForm(),
+      ...service,
+      stepsText: Array.isArray(service.steps) ? service.steps.join("\n") : "",
+      documentsText: Array.isArray(service.documents) ? service.documents.join("\n") : "",
+    });
     setIsModalOpen(true);
   };
 
   // --- SUBMIT (ADD or UPDATE) ---
   const handleSubmit = async () => {
-    if(!currentService.name || !currentService.title) {
+    if (!currentService.name || !currentService.title) {
       alert("Please fill Name and Description");
       return;
     }
 
+    const steps = String(currentService.stepsText || "")
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const documents = String(currentService.documentsText || "")
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    const { stepsText, documentsText, ...rest } = currentService;
+    const payload = { ...rest, steps, documents };
+
     if (isEditing) {
       // Update Logic
-      const res = await updateService(currentService._id, currentService);
+      const res = await updateService(currentService._id, payload);
       if (!res?.success) {
         alert(res?.error || "Update failed (login required)");
         return;
       }
     } else {
       // Add Logic
-      const res = await addService(currentService);
+      const res = await addService(payload);
       if (!res?.success) {
         alert(res?.error || "Add failed (login required)");
         return;
@@ -198,6 +222,85 @@ const ManageServices = () => {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all resize-none"
                   placeholder="Short description about the service"
                 ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">URL slug (optional)</label>
+                <input
+                  name="slug"
+                  value={currentService.slug || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                  placeholder="e.g. aadhaar-update (auto from name if empty)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Hindi subtitle (optional)</label>
+                <input
+                  name="nameHi"
+                  value={currentService.nameHi || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                  placeholder="e.g. आधार कार्ड अपडेट"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">About this service (long text)</label>
+                <textarea
+                  name="aboutContent"
+                  value={currentService.aboutContent || ""}
+                  onChange={handleChange}
+                  rows="5"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all resize-none"
+                  placeholder="Shown on the public service detail page"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Processing time</label>
+                <input
+                  name="processingTime"
+                  value={currentService.processingTime || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                  placeholder="7 - 10 working days"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">How to apply (one step per line)</label>
+                <textarea
+                  name="stepsText"
+                  value={currentService.stepsText || ""}
+                  onChange={handleChange}
+                  rows="4"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all resize-none"
+                  placeholder={"Visit center...\nSubmit documents..."}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Required documents (one per line)</label>
+                <textarea
+                  name="documentsText"
+                  value={currentService.documentsText || ""}
+                  onChange={handleChange}
+                  rows="4"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Download form URL (optional)</label>
+                <input
+                  name="formUrl"
+                  value={currentService.formUrl || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                  placeholder="https://..."
+                />
               </div>
 
               {/* Price & Category Grid */}

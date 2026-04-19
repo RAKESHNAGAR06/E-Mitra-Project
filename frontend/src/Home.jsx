@@ -1,5 +1,6 @@
 import './App.css';
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { FaIdCard, FaBolt, FaWater, FaCreditCard, FaPassport, FaVoteYea, FaFileAlt, FaHome, FaUserCheck, FaCertificate, FaClipboardList, FaUserShield, FaAddressCard } from "react-icons/fa";
 import { ShieldCheck, Zap, CheckCircle, ChevronDown } from "lucide-react";
 
@@ -73,7 +74,7 @@ function Home() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">All Government Services in One Place</h1>
             <p className="mb-6 text-lg">Apply for documents, pay bills & track requests easily</p>
             <div className="flex gap-4">
-            <a href='/contact'><button className="bg-white text-blue-700 px-6 py-3 rounded-full shadow">Apply Now</button></a>
+            <Link to="/Contact" className="inline-block bg-white text-blue-700 px-6 py-3 rounded-full shadow">Apply Now</Link>
             <a href='/Services'> <button className="bg-orange-600 px-6 py-3 rounded-full shadow">View Services</button></a>
             </div>
           </div>
@@ -176,9 +177,12 @@ function Home() {
                     {s.price ? s.price : 'Free'}
                   </span>
                   
-                 <a href='/service/aadhaar'> <button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
+                 <Link
+                    to={`/service/${encodeURIComponent((s.slug || s._id || "").toString())}`}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors inline-block"
+                  >
                     Apply
-                  </button> </a>
+                  </Link>
                 </div>
 
               </div>
@@ -297,7 +301,7 @@ function Home() {
         </div>
         <div className="mt-20 text-center">
           <p className="text-gray-500 mb-4">Still have questions?</p>
-          <button className="bg-gradient-to-r from-blue-600 to-orange-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition">Contact Support</button>
+          <Link to="/Contact" className="inline-block bg-gradient-to-r from-blue-600 to-orange-500 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transition">Contact Support</Link>
         </div>
       </section>
     </div>

@@ -11,6 +11,7 @@ const Navbar = () => {
   const location = useLocation();
   const { isLoggedIn, bootstrapped, user, logout } = useContext(UserAuthContext);
   const [userAuthOpen, setUserAuthOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // NavLinks data - yahan paths define kiye hain
   const navLinks = [
@@ -36,6 +37,21 @@ const Navbar = () => {
       document.body.style.overflow = 'unset';
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setProfileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [profileOpen]);
+
+  const userInitial = (() => {
+    const n = String(user?.name || user?.email || "").trim();
+    if (!n) return "?";
+    return n[0].toUpperCase();
+  })();
 
   // Active link check karne ka function
   const isActive = (path) => {
@@ -109,13 +125,61 @@ const Navbar = () => {
                   >
                     My dashboard
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => logout()}
-                    className="ml-2 px-4 py-2.5 text-sm font-semibold text-gray-500 hover:text-gray-800"
-                  >
-                    Log out
-                  </button>
+                  <div className="relative ml-2">
+                    <button
+                      type="button"
+                      onClick={() => setProfileOpen((v) => !v)}
+                      className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-orange-500 text-white font-bold shadow-md shadow-orange-500/20 hover:opacity-95"
+                      aria-haspopup="dialog"
+                      aria-expanded={profileOpen}
+                      title="Account"
+                    >
+                      {userInitial}
+                    </button>
+                    {profileOpen ? (
+                      <>
+                        <button
+                          type="button"
+                          className="fixed inset-0 z-40 cursor-default bg-transparent"
+                          aria-label="Close profile menu"
+                          onClick={() => setProfileOpen(false)}
+                        />
+                        <div className="absolute right-0 mt-2 w-80 z-50 rounded-2xl border border-gray-100 bg-white shadow-2xl p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-600 to-orange-500 text-white font-bold flex items-center justify-center shrink-0">
+                              {userInitial}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-gray-900 truncate">{user?.name || "Account"}</p>
+                              <p className="text-xs text-gray-500 break-all mt-0.5">{user?.email || "—"}</p>
+                              <p className="text-xs text-gray-600 mt-2">
+                                Mobile: <span className="font-semibold text-gray-800">{user?.phone || "—"}</span>
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-4 grid grid-cols-1 gap-2">
+                            <Link
+                              to="/dashboard"
+                              onClick={() => setProfileOpen(false)}
+                              className="w-full text-center px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-800 text-sm font-semibold border border-gray-100"
+                            >
+                              My dashboard
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setProfileOpen(false);
+                                logout();
+                              }}
+                              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50"
+                            >
+                              Log out
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
                 </>
               ) : (
                 <button
@@ -271,6 +335,15 @@ const Navbar = () => {
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-100 bg-gray-50/50 space-y-2">
           {bootstrapped && isLoggedIn ? (
             <>
+              <div className="mb-3 flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-orange-500 text-white font-bold flex items-center justify-center shrink-0">
+                  {userInitial}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-900 truncate">{user?.name || "Account"}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email || ""}</p>
+                </div>
+              </div>
               <Link
                 to="/dashboard"
                 onClick={() => setIsOpen(false)}
