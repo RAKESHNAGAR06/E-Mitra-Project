@@ -9,7 +9,7 @@ const Footer = () => {
     { name: 'Home', hindi: 'होम', path: '/' },
     { name: 'Services', hindi: 'सेवाएं', path: '/Services' },
     { name: 'About Us', hindi: 'बारे में', path: '/About' },
-    { name: 'Contact', hindi: 'संपर्क', path: '/#' },
+    { name: 'Contact', hindi: 'संपर्क', path: '/Contact' },
   ];
 
   // Popular Services Data

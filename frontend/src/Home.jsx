@@ -73,8 +73,8 @@ function Home() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">All Government Services in One Place</h1>
             <p className="mb-6 text-lg">Apply for documents, pay bills & track requests easily</p>
             <div className="flex gap-4">
-              <button className="bg-white text-blue-700 px-6 py-3 rounded-full shadow">Apply Now</button>
-              <button className="bg-orange-600 px-6 py-3 rounded-full shadow">View Services</button>
+            <a href='/contact'><button className="bg-white text-blue-700 px-6 py-3 rounded-full shadow">Apply Now</button></a>
+            <a href='/Services'> <button className="bg-orange-600 px-6 py-3 rounded-full shadow">View Services</button></a>
             </div>
           </div>
           <div className="bg-white text-gray-700 p-6 rounded-3xl shadow-xl">
@@ -176,9 +176,9 @@ function Home() {
                     {s.price ? s.price : 'Free'}
                   </span>
                   
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
+                 <a href='/service/aadhaar'> <button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
                     Apply
-                  </button>
+                  </button> </a>
                 </div>
 
               </div>
