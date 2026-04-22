@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
@@ -37,12 +38,20 @@ function requireRole(...roles) {
   };
 }
 
-function requireCustomer(req, res, next) {
+async function requireCustomer(req, res, next) {
   if (!req.auth?.role) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   if (req.auth.role !== "user") {
     return res.status(403).json({ error: "Customer account required" });
+  }
+  try {
+    const user = await User.findById(req.auth.sub).select("blocked role").lean();
+    if (!user) return res.status(401).json({ error: "Unauthorized" });
+    if (user.role !== "user") return res.status(403).json({ error: "Customer account required" });
+    if (user.blocked) return res.status(403).json({ error: "Account blocked" });
+  } catch (e) {
+    return res.status(500).json({ error: "Auth check failed" });
   }
   return next();
 }

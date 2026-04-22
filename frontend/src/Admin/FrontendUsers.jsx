@@ -11,14 +11,15 @@ const Field = ({ label, children }) => (
 );
 
 export default function FrontendUsers() {
-  const { token, isAuthed } = useContext(AuthContext);
+  const { token, isAuthed, user } = useContext(AuthContext);
+  const isSuperAdmin = user?.role === "superadmin";
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   const [editOpen, setEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ id: "", email: "", name: "", phone: "", blocked: false });
+  const [editForm, setEditForm] = useState({ id: "", email: "", name: "", phone: "", blocked: false, password: "" });
 
   const load = async () => {
     if (!isAuthed || !token) return;
@@ -53,13 +54,14 @@ export default function FrontendUsers() {
       name: u.name || "",
       phone: u.phone || "",
       blocked: Boolean(u.blocked),
+      password: "",
     });
     setEditOpen(true);
   };
 
   const closeEdit = () => {
     setEditOpen(false);
-    setEditForm({ id: "", email: "", name: "", phone: "", blocked: false });
+    setEditForm({ id: "", email: "", name: "", phone: "", blocked: false, password: "" });
   };
 
   const saveEdit = async (e) => {
@@ -76,6 +78,7 @@ export default function FrontendUsers() {
           name: editForm.name,
           phone: editForm.phone,
           blocked: editForm.blocked,
+          password: editForm.password || undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -159,13 +162,15 @@ export default function FrontendUsers() {
                   </td>
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openEdit(u)}
-                        className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-xs"
-                      >
-                        Edit
-                      </button>
+                      {isSuperAdmin ? (
+                        <button
+                          type="button"
+                          onClick={() => openEdit(u)}
+                          className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-xs"
+                        >
+                          Edit
+                        </button>
+                      ) : null}
                       <button
                         type="button"
                         onClick={() => toggleBlocked(u)}
@@ -205,12 +210,21 @@ export default function FrontendUsers() {
             </div>
 
             <form onSubmit={saveEdit} className="p-6 space-y-4">
+              {!isSuperAdmin ? (
+                <div className="rounded-xl bg-amber-50 text-amber-800 px-4 py-3 text-sm">
+                  Only superadmin can edit user details or change passwords.
+                </div>
+              ) : null}
               <Field label="Email">
                 <input
                   value={editForm.email}
                   onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))}
                   type="email"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"
+                  disabled={!isSuperAdmin}
+                  className={[
+                    "w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none",
+                    isSuperAdmin ? "border-gray-200 focus:ring-orange-500" : "border-gray-100 bg-gray-50 text-gray-400",
+                  ].join(" ")}
                   required
                 />
               </Field>
@@ -218,14 +232,36 @@ export default function FrontendUsers() {
                 <input
                   value={editForm.name}
                   onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"
+                  disabled={!isSuperAdmin}
+                  className={[
+                    "w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none",
+                    isSuperAdmin ? "border-gray-200 focus:ring-orange-500" : "border-gray-100 bg-gray-50 text-gray-400",
+                  ].join(" ")}
                 />
               </Field>
               <Field label="Phone">
                 <input
                   value={editForm.phone}
                   onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 outline-none"
+                  disabled={!isSuperAdmin}
+                  className={[
+                    "w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none",
+                    isSuperAdmin ? "border-gray-200 focus:ring-orange-500" : "border-gray-100 bg-gray-50 text-gray-400",
+                  ].join(" ")}
+                />
+              </Field>
+
+              <Field label="New Password (superadmin only)">
+                <input
+                  value={editForm.password}
+                  onChange={(e) => setEditForm((p) => ({ ...p, password: e.target.value }))}
+                  type="password"
+                  disabled={!isSuperAdmin}
+                  className={[
+                    "w-full px-4 py-3 rounded-xl border focus:ring-2 outline-none",
+                    isSuperAdmin ? "border-gray-200 focus:ring-orange-500" : "border-gray-100 bg-gray-50 text-gray-400",
+                  ].join(" ")}
+                  placeholder={isSuperAdmin ? "Leave blank to keep unchanged" : "Restricted"}
                 />
               </Field>
 
