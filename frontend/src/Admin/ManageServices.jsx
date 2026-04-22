@@ -186,7 +186,7 @@ const ManageServices = () => {
       {/* Modal (Add / Edit) */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 m-4 transform transition-all scale-95 animate-fade-in">
+          <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 m-4 transform transition-all scale-95 animate-fade-in h-full overflow-y-auto">
             
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-6">
