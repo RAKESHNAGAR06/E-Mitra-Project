@@ -11,6 +11,32 @@ const siteSettingsSchema = new mongoose.Schema(
     email: { type: String, default: "" },
     workingHours: { type: String, default: "" },
     whatsappNumber: { type: String, default: "" },
+
+    footerQuickLinks: {
+      type: [
+        {
+          label: { type: String, default: "" },
+          hindi: { type: String, default: "" },
+          path: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
+    footerMenuLinks: {
+      type: [
+        {
+          label: { type: String, default: "" },
+          path: { type: String, default: "" },
+        },
+      ],
+      default: [],
+    },
+    footerSocial: {
+      facebook: { type: String, default: "" },
+      twitter: { type: String, default: "" },
+      instagram: { type: String, default: "" },
+      youtube: { type: String, default: "" },
+    },
   },
   { timestamps: true }
 );

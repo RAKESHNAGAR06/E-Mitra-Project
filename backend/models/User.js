@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["superadmin", "admin", "user"], required: true },
     name: { type: String, trim: true, default: "" },
     phone: { type: String, trim: true, default: "" },
+    blocked: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

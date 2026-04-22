@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserAuthContext } from "./context/UserAuthContext";
 import UserAuthModal from "./UserAuthModal";
-import { FaClipboardList, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaCreditCard } from "react-icons/fa";
+import { FaClipboardList, FaCheckCircle, FaHourglassHalf, FaTimesCircle, FaCreditCard, FaFileAlt } from "react-icons/fa";
 import { startRazorpayPayment } from "./utils/startRazorpayPayment";
 
 export default function UserDashboard() {
@@ -13,6 +13,7 @@ export default function UserDashboard() {
   const [error, setError] = useState("");
   const [payMsg, setPayMsg] = useState("");
   const [payingId, setPayingId] = useState(null);
+  const [serviceForms, setServiceForms] = useState({});
 
   useEffect(() => {
     if (!bootstrapped || !isLoggedIn) {
@@ -42,6 +43,60 @@ export default function UserDashboard() {
       cancelled = true;
     };
   }, [bootstrapped, isLoggedIn, apiBase, getAuthHeader]);
+
+  useEffect(() => {
+    if (!bootstrapped || !isLoggedIn) return;
+    const slugs = Array.from(new Set((requests || []).map((r) => r.serviceSlug).filter(Boolean)));
+    if (!slugs.length) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const missing = slugs.filter((s) => serviceForms[s] === undefined);
+        if (!missing.length) return;
+        const results = await Promise.all(
+          missing.map(async (slug) => {
+            try {
+              const res = await fetch(`${apiBase}/services/detail/${encodeURIComponent(String(slug))}`);
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) return [slug, null];
+              return [slug, data?.formUrl ? String(data.formUrl) : null];
+            } catch {
+              return [slug, null];
+            }
+          })
+        );
+        if (cancelled) return;
+        setServiceForms((prev) => {
+          const next = { ...prev };
+          for (const [slug, url] of results) next[slug] = url;
+          return next;
+        });
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requests, bootstrapped, isLoggedIn, apiBase]);
+
+  const openUploadedDocument = async (id) => {
+    if (!id) return;
+    try {
+      const res = await fetch(`${apiBase}/service-requests/${id}/attachment`, {
+        headers: { ...getAuthHeader() },
+      });
+      if (!res.ok) throw new Error("Could not open file");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      setError(e.message || "Could not open attachment");
+    }
+  };
 
   const payRequest = async (r) => {
     if (!r?.id) return;
@@ -167,16 +222,39 @@ export default function UserDashboard() {
                           </p>
                         </div>
                       </div>
-                      {r.paymentStatus !== "paid" && Number(r.amountPaise) >= 100 ? (
-                        <button
-                          type="button"
-                          disabled={payingId === r.id}
-                          onClick={() => payRequest(r)}
-                          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white text-sm font-semibold"
-                        >
-                          <FaCreditCard /> {payingId === r.id ? "Opening…" : "Pay now"}
-                        </button>
-                      ) : null}
+                      <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {r.attachment?.originalName ? (
+                          <button
+                            type="button"
+                            onClick={() => openUploadedDocument(r.id)}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold"
+                          >
+                            <FaFileAlt /> View document
+                          </button>
+                        ) : null}
+
+                        {r.serviceSlug && serviceForms[r.serviceSlug] ? (
+                          <a
+                            href={serviceForms[r.serviceSlug]}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"
+                          >
+                            <FaFileAlt /> Download form
+                          </a>
+                        ) : null}
+
+                        {r.paymentStatus !== "paid" && Number(r.amountPaise) >= 100 ? (
+                          <button
+                            type="button"
+                            disabled={payingId === r.id}
+                            onClick={() => payRequest(r)}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white text-sm font-semibold"
+                          >
+                            <FaCreditCard /> {payingId === r.id ? "Opening…" : "Pay now"}
+                          </button>
+                        ) : null}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -208,6 +286,28 @@ export default function UserDashboard() {
                             {r.updatedAt ? new Date(r.updatedAt).toLocaleString() : ""}
                           </p>
                         </div>
+                      </div>
+                      <div className="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                        {r.attachment?.originalName ? (
+                          <button
+                            type="button"
+                            onClick={() => openUploadedDocument(r.id)}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-semibold"
+                          >
+                            <FaFileAlt /> View document
+                          </button>
+                        ) : null}
+
+                        {r.serviceSlug && serviceForms[r.serviceSlug] ? (
+                          <a
+                            href={serviceForms[r.serviceSlug]}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"
+                          >
+                            <FaFileAlt /> Download form
+                          </a>
+                        ) : null}
                       </div>
                     </li>
                   ))}

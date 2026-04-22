@@ -246,26 +246,7 @@ export default function ServiceDetail() {
               Apply Now <FaArrowRight />
             </button>
 
-            {service.formUrl ? (
-              <a
-                href={service.formUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl transition-colors text-center"
-              >
-                <span className="inline-flex items-center justify-center gap-2">
-                  <FaFileAlt /> Download Form
-                </span>
-              </a>
-            ) : (
-              <button
-                type="button"
-                disabled
-                className="w-full py-3 bg-gray-200 text-gray-500 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <FaFileAlt /> Download Form
-              </button>
-            )}
+            {/* Form downloads are available from the user dashboard */}
 
             <div className="bg-gradient-to-r from-blue-900 to-blue-800 p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-white mb-4">Ready to Apply?</h3>

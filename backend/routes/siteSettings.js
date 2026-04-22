@@ -14,6 +14,14 @@ const DEFAULTS = {
   email: "info@emitra.gov.in",
   workingHours: "Monday - Saturday: 9:00 AM - 6:00 PM\nSunday: Closed",
   whatsappNumber: "919876543210",
+  footerQuickLinks: [
+    { label: "Home", hindi: "होम", path: "/" },
+    { label: "Services", hindi: "सेवाएं", path: "/Services" },
+    { label: "About Us", hindi: "बारे में", path: "/About" },
+    { label: "Contact", hindi: "संपर्क", path: "/Contact" },
+  ],
+  footerMenuLinks: [],
+  footerSocial: { facebook: "", twitter: "", instagram: "", youtube: "" },
 };
 
 async function getOrCreateDoc() {
@@ -36,6 +44,10 @@ function format(doc) {
     email: o.email || DEFAULTS.email,
     workingHours: o.workingHours || DEFAULTS.workingHours,
     whatsappNumber: o.whatsappNumber || DEFAULTS.whatsappNumber,
+    footerQuickLinks:
+      Array.isArray(o.footerQuickLinks) && o.footerQuickLinks.length > 0 ? o.footerQuickLinks : DEFAULTS.footerQuickLinks,
+    footerMenuLinks: Array.isArray(o.footerMenuLinks) ? o.footerMenuLinks : DEFAULTS.footerMenuLinks,
+    footerSocial: o.footerSocial || DEFAULTS.footerSocial,
     updatedAt: o.updatedAt,
   };
 }
@@ -49,7 +61,7 @@ router.get("/", async (_req, res) => {
   }
 });
 
-router.put("/", requireAuth, requireRole("admin", "superadmin"), async (req, res) => {
+router.put("/", requireAuth, requireRole("superadmin"), async (req, res) => {
   try {
     const body = req.body || {};
     const allowed = [
@@ -62,10 +74,18 @@ router.put("/", requireAuth, requireRole("admin", "superadmin"), async (req, res
       "email",
       "workingHours",
       "whatsappNumber",
+      "footerQuickLinks",
+      "footerMenuLinks",
+      "footerSocial",
     ];
     const patch = {};
     for (const k of allowed) {
-      if (body[k] !== undefined && body[k] !== null) patch[k] = String(body[k]);
+      if (body[k] === undefined || body[k] === null) continue;
+      if (k === "footerQuickLinks" || k === "footerMenuLinks" || k === "footerSocial") {
+        patch[k] = body[k];
+        continue;
+      }
+      patch[k] = String(body[k]);
     }
 
     let doc = await SiteSettings.findOne();

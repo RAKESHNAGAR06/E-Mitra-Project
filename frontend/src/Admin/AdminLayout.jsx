@@ -20,6 +20,8 @@ const AdminLayout = () => {
     { name: 'Manage Services', icon: '🛠️', path: '/admin/services' },
     { name: 'Gallery', icon: '🖼️', path: '/admin/gallery' },
     { name: 'Messages', icon: '✉️', path: '/admin/messages' },
+    { name: 'Admin Users', icon: '🧑‍💼', path: '/admin/admin-users' },
+    { name: 'Users', icon: '👥', path: '/admin/users' },
     { name: 'Settings', icon: '⚙️', path: '/admin/settings' },
   ];
 
