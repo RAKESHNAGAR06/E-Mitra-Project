@@ -14,6 +14,7 @@ export default function UserDashboard() {
   const [payMsg, setPayMsg] = useState("");
   const [payingId, setPayingId] = useState(null);
   const [serviceForms, setServiceForms] = useState({});
+  const [serviceFormByName, setServiceFormByName] = useState({});
 
   useEffect(() => {
     if (!bootstrapped || !isLoggedIn) {
@@ -82,6 +83,41 @@ export default function UserDashboard() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requests, bootstrapped, isLoggedIn, apiBase]);
+
+  useEffect(() => {
+    if (!bootstrapped || !isLoggedIn) return;
+    const needsNameFallback = (requests || []).some((r) => !r.serviceSlug && r.serviceName);
+    if (!needsNameFallback) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${apiBase}/services`);
+        const data = await res.json().catch(() => []);
+        if (!res.ok || !Array.isArray(data)) return;
+        const map = {};
+        for (const s of data) {
+          const name = String(s?.name || "").trim();
+          const url = s?.formUrl ? String(s.formUrl) : "";
+          if (name && url) map[name.toLowerCase()] = url;
+        }
+        if (!cancelled) setServiceFormByName(map);
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [requests, bootstrapped, isLoggedIn, apiBase]);
+
+  const formUrlForRequest = (r) => {
+    if (r?.serviceSlug && serviceForms[r.serviceSlug]) return serviceForms[r.serviceSlug];
+    const key = String(r?.serviceName || "").toLowerCase().trim();
+    if (key && serviceFormByName[key]) return serviceFormByName[key];
+    return "";
+  };
 
   const openUploadedDocument = async (id) => {
     if (!id) return;
@@ -233,9 +269,9 @@ export default function UserDashboard() {
                           </button>
                         ) : null}
 
-                        {r.serviceSlug && serviceForms[r.serviceSlug] ? (
+                        {formUrlForRequest(r) ? (
                           <a
-                            href={serviceForms[r.serviceSlug]}
+                            href={formUrlForRequest(r)}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"
@@ -298,9 +334,9 @@ export default function UserDashboard() {
                           </button>
                         ) : null}
 
-                        {r.serviceSlug && serviceForms[r.serviceSlug] ? (
+                        {formUrlForRequest(r) ? (
                           <a
-                            href={serviceForms[r.serviceSlug]}
+                            href={formUrlForRequest(r)}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"

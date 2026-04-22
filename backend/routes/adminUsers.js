@@ -48,7 +48,9 @@ router.post("/users", requireAuth, requireRole("superadmin"), async (req, res) =
 // Superadmin-only: list admins
 router.get("/users", requireAuth, requireRole("superadmin"), async (req, res) => {
   try {
-    const users = await User.find().select("_id email role createdAt updatedAt").sort({ createdAt: -1 });
+    const users = await User.find({ role: { $in: ["admin", "superadmin"] } })
+      .select("_id email role createdAt updatedAt")
+      .sort({ createdAt: -1 });
     return res.json({
       users: users.map((u) => ({
         id: String(u._id),

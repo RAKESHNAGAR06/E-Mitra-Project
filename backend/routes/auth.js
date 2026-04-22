@@ -24,6 +24,7 @@ function publicUserPayload(user) {
     role: user.role,
     name: user.name || "",
     phone: user.phone || "",
+    blocked: Boolean(user.blocked),
   };
 }
 
@@ -63,6 +64,7 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email: String(email).toLowerCase().trim() });
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    if (user.blocked) return res.status(403).json({ error: "Account blocked" });
 
     const ok = await bcrypt.compare(String(password), user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid credentials" });
@@ -79,7 +81,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   try {
-    const user = await User.findById(req.auth.sub).select("email role name phone");
+    const user = await User.findById(req.auth.sub).select("email role name phone blocked");
     if (!user) return res.status(404).json({ error: "User not found" });
     return res.json({ user: publicUserPayload(user) });
   } catch (err) {

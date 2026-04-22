@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const { requireAuth, requireRole } = require("../middleware/auth");
 
@@ -35,15 +36,25 @@ router.patch("/:id", requireAuth, requireRole("admin", "superadmin"), async (req
 
     const body = req.body || {};
     const patch = {};
+    const isSuperAdmin = req.auth?.role === "superadmin";
 
-    if (body.email !== undefined) patch.email = String(body.email || "").toLowerCase().trim();
-    if (body.name !== undefined) patch.name = String(body.name || "").trim();
-    if (body.phone !== undefined) patch.phone = String(body.phone || "").trim();
+    // Only superadmin can change user details (email/name/phone/password). Admin can only block/unblock.
+    if (isSuperAdmin) {
+      if (body.email !== undefined) patch.email = String(body.email || "").toLowerCase().trim();
+      if (body.name !== undefined) patch.name = String(body.name || "").trim();
+      if (body.phone !== undefined) patch.phone = String(body.phone || "").trim();
+      if (body.password !== undefined) {
+        const pw = String(body.password || "");
+        if (!pw) return res.status(400).json({ error: "password cannot be empty" });
+        patch.passwordHash = await bcrypt.hash(pw, 10);
+      }
+    }
     if (body.blocked !== undefined) patch.blocked = Boolean(body.blocked);
 
     // Prevent changing role through this endpoint
     delete patch.role;
-    delete patch.passwordHash;
+    // role is immutable here; passwordHash only via superadmin logic above
+    delete patch.role;
 
     const updated = await User.findOneAndUpdate(
       { _id: id, role: "user" },
