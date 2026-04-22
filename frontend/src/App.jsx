@@ -14,6 +14,8 @@ import Dashboard from './Admin/Deshboard';
 import ManageServices from './Admin/ManageServices';
 import Settings from './Admin/Settings';
 import Messages from './Admin/Messages';
+import AdminUsers from './Admin/AdminUsers';
+import FrontendUsers from './Admin/FrontendUsers';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
           <Route index element={<Dashboard />} /> {/* /admin path */}
           <Route path="services" element={<ManageServices />} /> {/* /admin/services path */}
           <Route path="messages" element={<Messages />} /> {/* /admin/messages path */}
+          <Route path="admin-users" element={<AdminUsers />} /> {/* /admin/admin-users path */}
+          <Route path="users" element={<FrontendUsers />} /> {/* /admin/users path */}
           <Route path="settings" element={<Settings />} /> {/* /admin/settings path */}
           {/* Add more admin routes here */}
         </Route>

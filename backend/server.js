@@ -11,6 +11,7 @@ const adminUsersRoutes = require("./routes/adminUsers");
 const serviceRequestsRoutes = require("./routes/serviceRequests");
 const paymentsRoutes = require("./routes/payments");
 const siteSettingsRoutes = require("./routes/siteSettings");
+const frontendUsersRoutes = require("./routes/frontendUsers");
 const { ensureUniqueSlug } = require("./utils/serviceSlug");
 const { requireAuth, requireRole } = require("./middleware/auth");
 
@@ -101,6 +102,7 @@ app.use("/api/admin", adminUsersRoutes);
 app.use("/api/service-requests", serviceRequestsRoutes);
 app.use("/api/payments", paymentsRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);
+app.use("/api/users", frontendUsersRoutes);
 
 // 1. Get All Services (Read)
 app.get('/api/services', async (req, res) => {
